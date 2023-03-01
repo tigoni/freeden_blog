@@ -22,12 +22,9 @@ mod freeden_blogr {
 // Instantiate the contract with a default account and percentage
     impl FreedenBlogr {
         #[ink(constructor)]
-        pub fn new(init_value: u128, account: AccountId) -> Self {
-            let mut accounts = Mapping::default();
-            let balance: Balance = init_value;
-            // let caller = Self::env().caller();
-            accounts.insert(&account, &balance);
-
+        pub fn new() -> Self {
+            let accounts = Mapping::default();
+            let balance: Balance = Balance::default();
             Self {
                 payees: accounts,
                 payout_amount: balance,
@@ -40,15 +37,27 @@ mod freeden_blogr {
             self.payees.insert(payee, &percentage);
         }
 
+        //update pauout amount on new subscription
+        #[ink(message)]
+        pub fn add_aubscriber_amount(&mut self, amount: u128){
+            self.payout_amount += amount;
+        }
+
         #[ink(message)]
         pub fn pay_accounts(&mut self) {
             //distribute to accounts, the value based on the percentages
         }
-
+        
         #[ink(message)]
-        pub fn check_balance(&self, account: AccountId) -> u128 {
+        pub fn payee_balance(&self, account: AccountId) -> u128 {
             // let caller = Self::env().caller();
             self.payees.get(&account).unwrap_or_default()
+        }
+
+
+        #[ink(message)]
+        pub fn total_balance(&self) -> u128 {
+            self.payout_amount
         }
     }
 }
