@@ -11,12 +11,12 @@ mod freeden_blogr {
         feature = "std",
         derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
     )]
-    pub struct Payees{
+    pub struct PayoutConfig{
         percentages: u128,
         amount: u128,
     }
 
-    impl Payees {
+    impl PayoutConfig {
         pub fn new() -> Self {
             Self {
                 percentages: 0,
@@ -27,7 +27,7 @@ mod freeden_blogr {
 
     #[ink(storage)]
     pub struct FreedenBlogr {
-        payees: Mapping<AccountId, Payees>,
+        payees: Mapping<AccountId, PayoutConfig>,
         payout_amount: u128,
         account_keys: Vec<AccountId>,
     }
@@ -48,7 +48,7 @@ mod freeden_blogr {
 // Adds a payee with a percentage share to the contract 
         #[ink(message)]
         pub fn add_payee(&mut self, acc:AccountId, percentage: u128){
-            let mut payee: Payees = Payees::new();
+            let mut payee: PayoutConfig = PayoutConfig::new();
             payee.percentages = percentage; 
             self.payees.insert(acc, &payee);
         }
@@ -66,6 +66,7 @@ mod freeden_blogr {
                 let mut acc = self.payees.get(key).unwrap();
                 acc.amount = acc.percentages * self.payout_amount
             }
+            
 
         }
         
