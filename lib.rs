@@ -4,6 +4,7 @@
 mod freeden_blogr {
     use ink::prelude::vec::Vec;
     use ink::storage::Mapping;
+    use sp_arithematic::per_things::Percent;
 
     #[derive(scale::Decode, scale::Encode)]
     #[cfg_attr(
@@ -11,7 +12,7 @@ mod freeden_blogr {
         derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
     )]
     pub struct PayoutConfig {
-        percentages: u128,
+        percentages: Perc,
         amount: u128,
     }
 
@@ -67,9 +68,9 @@ mod freeden_blogr {
                 let acc = self.accounts.get(key);
 
                 match acc {
-                    Some(mut acc) => {
+                    Some(acc) => {
                         let mut payee: PayoutConfig = PayoutConfig::new();
-                        let pay_alloc = acc.percentages/100 * self.subscription_total;
+                        let pay_alloc = acc.percentages / 100 * self.subscription_total;
                         payee.amount = pay_alloc;
                         payee.percentages = acc.percentages;
                         self.subscription_total = self.subscription_total - pay_alloc;
