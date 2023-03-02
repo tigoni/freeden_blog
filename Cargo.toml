@@ -9,6 +9,7 @@ ink = { version = "4.0.0-beta", default-features = false }
 
 scale = { package = "parity-scale-codec", version = "3", default-features = false, features = ["derive"] }
 scale-info = { version = "2.3", default-features = false, features = ["derive"], optional = true }
+sp-arithmetic = "13.0.0"
 
 [lib]
 name = "freeden_blogr"
@@ -20,9 +21,5 @@ crate-type = [
 
 [features]
 default = ["std"]
-std = [
-    "ink/std",
-    "scale/std",
-    "scale-info/std",
-]
+std = ["ink/std", "scale/std", "scale-info/std"]
 ink-as-dependency = []
