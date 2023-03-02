@@ -4,16 +4,16 @@
 mod freeden_blogr {
     use ink::prelude::vec::Vec;
     use ink::storage::Mapping;
-    use sp_arithmetic::per_things::Percent;
-
+    use scale::CompactAs;
+    use sp_arithmetic::fixed_point::FixedU128;
 
     #[derive(scale::Decode, scale::Encode)]
     #[cfg_attr(
         feature = "std",
-        derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout )
+        derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
     )]
     pub struct PayoutConfig {
-        percentages: Percent,
+        percentages: u128,
         amount: u128,
     }
 
@@ -48,9 +48,9 @@ mod freeden_blogr {
 
         // Adds a payee with a percentage share to the contract
         #[ink(message)]
-        pub fn add_payee(&mut self, acc: AccountId, percentage: Percent) {
+        pub fn add_payee(&mut self, acc: AccountId, percentage: FixedU128) {
             let mut payee: PayoutConfig = PayoutConfig::new();
-            payee.percentages = percentage;
+            payee.percentages = *percentage.encode_as();
             self.accounts.insert(acc, &payee);
             //Update the keys mapper to add a key for this new payee
             self.account_keys.push(acc);
@@ -71,8 +71,9 @@ mod freeden_blogr {
                 match acc {
                     Some(acc) => {
                         let mut payee: PayoutConfig = PayoutConfig::new();
-                        let pay_alloc = acc.percentages * self.subscription_total;
-                        payee.amount = pay_alloc;
+                        let pay_alloc = FixedU128::decode_from(acc.percentages).unwrap()
+                            * FixedU128::from(self.subscription_total);
+                        payee.amount = *pay_alloc.encode_as();
                         payee.percentages = acc.percentages;
                         self.subscription_total = self.subscription_total - pay_alloc;
                     }
