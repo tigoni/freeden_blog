@@ -65,10 +65,16 @@ mod freeden_blogr {
             //distribute to accounts, the value based on the percentages
             for key in &self.account_keys {
                 let acc = self.accounts.get(key);
+
                 match acc {
-                    Some(mut acc) => acc.amount = acc.percentages * self.subscription_total,
+                    Some(mut acc) => {
+                        let mut payee: PayoutConfig = PayoutConfig::new();
+                        let pay_alloc = acc.percentages/100 * self.subscription_total;
+                        payee.amount = pay_alloc;
+                        payee.percentages = acc.percentages;
+                        self.subscription_total = self.subscription_total - pay_alloc;
+                    }
                     None => panic!("error occurred in payout calculation!!"),
-                    
                 }
                 // acc.amount = acc.percentages * self.subscription_total
             }
