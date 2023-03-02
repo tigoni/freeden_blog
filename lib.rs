@@ -61,18 +61,23 @@ mod freeden_blogr {
         }
 
         #[ink(message)]
-        pub fn pay_accounts(&self) {
+        pub fn pay_accounts(&mut self) {
             //distribute to accounts, the value based on the percentages
             for key in &self.account_keys {
-                let mut acc = self.accounts.get(key).unwrap();
-                acc.amount = acc.percentages * self.subscription_total
+                let acc = self.accounts.get(key);
+                match acc {
+                    Some(mut acc) => acc.amount = acc.percentages * self.subscription_total,
+                    None => panic!("error occurred in payout calculation!!"),
+                    
+                }
+                // acc.amount = acc.percentages * self.subscription_total
             }
         }
 
         #[ink(message)]
         pub fn payee_balance(&self, account: AccountId) -> u128 {
             // let caller = Self::env().caller();
-            self.accounts.get(account).unwrap().percentages
+            self.accounts.get(account).unwrap().amount
         }
 
         #[ink(message)]
