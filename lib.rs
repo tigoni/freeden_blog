@@ -62,15 +62,14 @@ mod freeden_blogr {
 
         #[ink(message)]
         pub fn pay_accounts(&mut self) {
-
-            //distribute to accounts, the value based on the percentages
             for key in &self.account_keys {
                 let acc = self.accounts.get(key);
                 match acc {
                     Some(acc) => {
                         let pay_alloc = FixedU128::decode_from(acc.percentages).unwrap_or_default()
                             * FixedU128::from(Self::env().balance());
-                            Self::env().transfer(*key, *pay_alloc.encode_as()).unwrap_or_default();
+                            let amount: Balance = acc.percentages / 100 * Self::env().balance();
+                            Self::env().transfer(*key, amount).unwrap_or_default();
                     }
                     None => panic!("error occurred in payout calculation!!"),
                 }
