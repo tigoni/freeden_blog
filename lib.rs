@@ -14,14 +14,12 @@ mod freeden_blogr {
     )]
     pub struct PayoutConfig {
         percentages: u128,
-        amount: u128,
     }
 
     impl PayoutConfig {
         pub fn new() -> Self {
             Self {
                 percentages: 0,
-                amount: 0,
             }
         }
     }
@@ -29,20 +27,19 @@ mod freeden_blogr {
     #[ink(storage)]
     pub struct FreedenBlogr {
         accounts: Mapping<AccountId, PayoutConfig>,
-        subscription_total: u128,
         account_keys: Vec<AccountId>,
+        subscribers: Mapping<AccountId, Balance>,
     }
     // Instantiate the contract with a default account and percentage
     impl FreedenBlogr {
         #[ink(constructor)]
         pub fn new() -> Self {
             let init_accounts = Mapping::default();
-            let balance: Balance = Balance::default();
             let keys: Vec<AccountId> = Vec::new();
             Self {
                 accounts: init_accounts,
-                subscription_total: balance,
                 account_keys: keys,
+                subscribers: Mapping::default(),
             }
         }
 
@@ -51,17 +48,15 @@ mod freeden_blogr {
         pub fn add_payee(&mut self, acc: AccountId, percentage: FixedU128) {
             let mut payee: PayoutConfig = PayoutConfig::new();
             payee.percentages = *percentage.encode_as();
-            ink::env::debug_println!("Percentage payment {:?}",percentage);
             self.accounts.insert(acc, &payee);
-            //Update the keys mapper to add a key for this new payee
             self.account_keys.push(acc);
         }
 
-        //update pauout amount on new subscription
         #[ink(message, payable)]
-        pub fn add_aubscriber_amount(&mut self, amount: u128) {
+        pub fn subscribe(&mut self) {
+            let caller = Self::env().caller();
             let payment = Self::env().transferred_value();
-            self.subscription_total += payment;
+            self.subscribers.insert(caller,&payment);
         }
 
 
@@ -75,18 +70,12 @@ mod freeden_blogr {
                     Some(acc) => {
                         let pay_alloc = FixedU128::decode_from(acc.percentages).unwrap_or_default()
                             * FixedU128::from(Self::env().balance());
-                            let trans_amount: Balance = 20000000000000;
-                            Self::env().transfer(*key, trans_amount).unwrap_or_default();
+                            Self::env().transfer(*key, *pay_alloc.encode_as()).unwrap_or_default();
                     }
                     None => panic!("error occurred in payout calculation!!"),
                 }
             }
         }
-
-        // #[ink(message)]
-        // pub fn payee_balance(&self, account: AccountId) -> Balance {
-        //     account.to_owned()
-        // }
 
         #[ink(message)]
         pub fn total_balance(&self) -> Balance {
