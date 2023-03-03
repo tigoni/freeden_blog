@@ -75,7 +75,7 @@ mod freeden_blogr {
                             * FixedU128::from(self.subscription_total);
                         payee.amount = *pay_alloc.encode_as();
                         payee.percentages = acc.percentages;
-                        self.subscription_total = self.subscription_total - pay_alloc;
+                        self.subscription_total = self.subscription_total - *pay_alloc.encode_as();
                     }
                     None => panic!("error occurred in payout calculation!!"),
                 }
