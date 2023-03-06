@@ -69,7 +69,7 @@ mod freeden_blogr {
                         let pay_alloc = Percent::decode_from(acc.percentages.into()).unwrap_or_default();
                             Self::env().transfer(*key, pay_alloc * self.total_balance()).unwrap();
                     }
-                    None => panic!("error occurred in payout calculation!!"),
+                    None => panic!("No accounts added for payout"),
                 }
             }
         }
