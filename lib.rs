@@ -5,6 +5,7 @@ mod freeden_blogr {
     use ink::prelude::vec::Vec;
     use ink::storage::Mapping;
     use scale::CompactAs;
+    use sp_arithmetic::Percent;
     use sp_arithmetic::fixed_point::FixedU128;
 
     #[derive(scale::Decode, scale::Encode)]
@@ -13,7 +14,7 @@ mod freeden_blogr {
         derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
     )]
     pub struct PayoutConfig {
-        percentages: u128,
+        percentages: u8,
     }
 
     impl PayoutConfig {
@@ -45,7 +46,7 @@ mod freeden_blogr {
 
         // Adds a payee with a percentage share to the contract 
         #[ink(message)]
-        pub fn add_payee(&mut self, acc: AccountId, percentage: FixedU128) {
+        pub fn add_payee(&mut self, acc: AccountId, percentage: Percent) {
             let mut payee: PayoutConfig = PayoutConfig::new();
             payee.percentages = *percentage.encode_as();
             self.accounts.insert(acc, &payee);
@@ -66,10 +67,8 @@ mod freeden_blogr {
                 let acc = self.accounts.get(key);
                 match acc {
                     Some(acc) => {
-                        let pay_alloc = FixedU128::decode_from(acc.percentages).unwrap_or_default()
-                            * FixedU128::from(Self::env().balance());
-                            let amount: Balance = acc.percentages / 100 * Self::env().balance();
-                            Self::env().transfer(*key, amount).unwrap_or_default();
+                        let pay_alloc = Percent::decode_from(acc.percentages.into()).unwrap_or_default();
+                            Self::env().transfer(*key, pay_alloc * self.total_balance()).unwrap();
                     }
                     None => panic!("error occurred in payout calculation!!"),
                 }
