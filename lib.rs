@@ -6,7 +6,6 @@ mod freeden_blogr {
     use ink::storage::Mapping;
     use scale::CompactAs;
     use sp_arithmetic::Percent;
-    use sp_arithmetic::fixed_point::FixedU128;
 
     #[derive(scale::Decode, scale::Encode)]
     #[cfg_attr(
