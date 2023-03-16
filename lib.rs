@@ -43,9 +43,9 @@ mod freeden_blogr {
             }
         }
 
-        // Adds a payee with a percentage share to the contract 
+        // Adds a author with a percentage share of the contract balance 
         #[ink(message)]
-        pub fn add_payee(&mut self, acc: AccountId, percentage: Percent) {
+        pub fn add_payee_account(&mut self, acc: AccountId, percentage: Percent) {
             let mut payee: PayoutConfig = PayoutConfig::new();
             payee.percentages = *percentage.encode_as();
             self.accounts.insert(acc, &payee);
